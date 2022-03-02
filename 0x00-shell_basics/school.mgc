@@ -1,2 +1,2 @@
 #!/bin/bash
-find . -type f -name "[SCHOOL]*" -exec file -m school.mgc {} +
+$ file -i -m school.mgc*
