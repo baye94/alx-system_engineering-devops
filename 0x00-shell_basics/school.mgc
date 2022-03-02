@@ -1,2 +1,2 @@
-0 search/256 SCHOOL File containing "SCHOOL"
-!:mime text/x-SCHOOL
+#!/bin/bash
+file -C -m school.mgc
