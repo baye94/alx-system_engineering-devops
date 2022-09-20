@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Installs Nginx and config
+# Script that configures a new Ubuntu machine to respect above requirements
 
-sudo apt-get update -y
-sudo apt-get install -y nginx
+apt-get update
+apt-get install -y nginx
 
-echo "Holberton School" | sudo tee /var/www/html/index.nginx-debian.html
+echo "Holberton School" | sudo tee /var/www/html/index.html
 
-sudo service nginx restart
+service nginx restart
