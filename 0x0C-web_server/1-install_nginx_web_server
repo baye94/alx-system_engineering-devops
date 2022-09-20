@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# 1. Install nginx web server
+# installs nginx and configures it on a remote server
+
 sudo apt-get -y update
 sudo apt-get -y install nginx
-sudo chmod 777 /var/www/html/index.nginx-debian.html
-echo "Hello World!" > /var/www/html/index.nginx-debian.html
-service nginx start
+sudo service ngix start
+sudo sh -c 'echo "Hello World" > /var/www/html/index.nginx-debian.html'
