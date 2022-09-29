@@ -7,8 +7,6 @@ global
 	user haproxy
 	group haproxy
 	daemon
-	maxconn 2048
-	tune.ssl.default-dh-param 2048
 
 	# Default SSL material locations
 	ca-base /etc/ssl/certs
@@ -38,23 +36,14 @@ defaults
 	errorfile 503 /etc/haproxy/errors/503.http
 	errorfile 504 /etc/haproxy/errors/504.http
 
-frontend http
-	 bind *:80
-	 reqadd X-Forwarded-Proto:\ http
-	 default_backend web-backend
+frontend www
+	bind *:80
+	bind *:443 ssl crt /etc/letsencrypt/live/emmastro.tech/all.pem
+	use_backend www
 
-frontend www-https
-	 bind *:443 ssl crt /etc/haproxy/certs/www.jdrestre.tech.pem
-	 reqadd X-Forwarded-Proto:\ https
-	 acl letsencrypt-acl path_beg /.well-known/acme-challenge/
-	 use_backend letsencrypt-backend if letsencrypt-acl
-	 default_backend web-backend
-
-backend web-backend
+backend www
 	balance roundrobin
-	redirect scheme https if !{ ssl_fc }
-	server 1238-web-01 34.74.80.43:80 check
-	server 1238-web-02 54.89.185.132:80 check
-
-backend letsencrypt-backend
-	server letsencrypt 127.0.0.1:8888
+    option httpclose
+   	option forwardfor
+	server 35-web-01 3.229.138.169:80 check
+	server 35-web-01 44.197.103.236 check
