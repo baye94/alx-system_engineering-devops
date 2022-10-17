@@ -1,30 +1,26 @@
+
 #!/usr/bin/python3
-'''A script that gathers employee name completed
-tasks and total number of tasks from an API
-'''
+"""
+A Python script that, using this REST API,
+for a given employee ID, returns information about his/her TODO list progress
+"""
+from argparse import ArgumentParser
+from os import path
+from requests import get
+from sys import argv
 
-import re
-import requests
-import sys
 
-REST_API = "https://jsonplaceholder.typicode.com"
+mockApi = "https://jsonplaceholder.typicode.com/"
+
 
 if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        if re.fullmatch(r'\d+', sys.argv[1]):
-            id = int(sys.argv[1])
-            emp_req = requests.get('{}/users/{}'.format(REST_API, id)).json()
-            task_req = requests.get('{}/todos'.format(REST_API)).json()
-            emp_name = emp_req.get('name')
-            tasks = list(filter(lambda x: x.get('userId') == id, task_req))
-            completed_tasks = list(filter(lambda x: x.get('completed'), tasks))
-            print(
-                'Employee {} is done with tasks({}/{}):'.format(
-                    emp_name,
-                    len(completed_tasks),
-                    len(tasks)
-                )
-            )
-            if len(completed_tasks) > 0:
-                for task in completed_tasks:
-                    print('\t {}'.format(task.get('title')))
+
+    parser = ArgumentParser(prog=path.basename(argv[0]))
+    parser.add_argument('ID', type=int, help="employee ID")
+    args = parser.parse_args()
+    user = get('/'.join([mockApi, 'users', str(args.id)])).json()
+    todo = get('/'.join([mockApi, 'todos']), params={'userId': args.id}).json()
+    completed = [task for task in todo if task['completed'] is True]
+    print('Employee {} is done with tasks({}/{}):'.format(
+        user['name'], len(completed), len(todo)))
+    print('\n'.join('\t {}'.format(task['title']) for task in completed))
