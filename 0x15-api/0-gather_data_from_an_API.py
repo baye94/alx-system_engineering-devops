@@ -1,25 +1,21 @@
 #!/usr/bin/python3
-""" Script that uses JSONPlaceholder API to get information about employee """
+"""Getting data from API placeholder."""
+
 import requests
 import sys
 
+if __name__ == '__main__':
+    """Gets API endpoint, then identify a user to display completed task info"""
+    endpoint = "https://jsonplaceholder.typicode.com/"
+    userId = sys.argv[1]
+    user = requests.get(endpoint + 'users/{}'.format(userId)).json()
+    todo = requests.get(endpoint + 'todos?userId={}'.format(userId)).json()
+    completed = []
 
-if __name__ == "__main__":
-    url = 'https://jsonplaceholder.typicode.com/'
-
-    user = '{}users/{}'.format(url, sys.argv[1])
-    res = requests.get(user)
-    json_o = res.json()
-    print("Employee {} is done with tasks".format(json_o.get('name')), end="")
-
-    todos = '{}todos?userId={}'.format(url, sys.argv[1])
-    res = requests.get(todos)
-    tasks = res.json()
-    l_task = []
-    for task in tasks:
-        if task.get('completed') is True:
-            l_task.append(task)
-
-    print("({}/{}):".format(len(l_task), len(tasks)))
-    for task in l_task:
-        print("\t {}".format(task.get("title")))
+    for task in todo:
+        if task.get("completed"):
+            completed.append(task.get("title"))
+    print("Employee {} is done with task({}/{}):"
+          .format(user.get('name'), len(completed), len(todo)))
+    for task in completed:
+        print('\t', task)
