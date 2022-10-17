@@ -10,18 +10,18 @@ if __name__ == "__main__":
         user = argv[1]
         url = "https://jsonplaceholder.typicode.com/"
         req = requests.get("{}users/{}".format(url, user))
-        name = req.json().get("name")
-        if name is not None:
+        EMPLOYEE_NAME = req.json().get("name")
+        if EMPLOYEE_NAME is not None:
             jreq = requests.get(
                 "{}todos?userId={}".format(
                     url, user)).json()
             alltsk = len(jreq)
-            completedtsk = []
+            NUMBER_OF_DONE_TASKS = []
             for t in jreq:
                 if t.get("completed") is True:
                     completedtsk.append(t)
-            count = len(completedtsk)
+            TOTAL_NUMBER_OF_TASKS = len( NUMBER_OF_DONE_TASKS)
             print("Employee {} is done with tasks({}/{}):"
-                  .format(name, count, alltsk))
-            for title in completedtsk:
+                  .format(EMPLOYEE_NAME, count, alltsk))
+            for title in NUMBER_OF_DONE_TASKS:
                 print("\t {}".format(title.get("title")))
