@@ -10,6 +10,3 @@ exec { 'nginx-restart':
   command => 'nginx restart',
   path    => '/etc/init.d/'
 }
-Footer
-© 2022 GitHub, Inc.
-
