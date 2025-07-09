@@ -1,29 +1,26 @@
-#!/bin/bash
-# shellcheck disable=SC2086
+#!/usr/bin/env bash
+# Display information about subdomains
 
-# Function to get info of a subdomain
-get_subdomain_info() {
-    local domain=$1
-    local subdomain=$2
-    result=$(dig ${subdomain}.${domain} +short)
-    record_type=$(dig ${subdomain}.${domain} | awk '/ANSWER SECTION/ {getline; print $4}')
-    echo "The subdomain ${subdomain} is a ${record_type} record and points to ${result}"
+subdomains_all=( "www" "lb-01" "web-01" "web-02" )
+
+runDig () {
+    subdomain=$1
+    domain=$2
+
+    dig "$subdomain.$domain" | grep -A1 'ANSWER SECTION:' | tail -1 | awk -v s="$subdomain" 'BEGIN { FS = " " } ; { print "The subdomain " s " is a " $4 " record and points to " $5 }'
 }
 
-# Check if at least the domain is provided
-if [ -z "$1" ]; then
+if [ $# -eq 1 ]; then
+    domain="$1"
+    for sub in "${subdomains_all[@]}"
+    do
+        runDig "$sub" "$domain"
+    done
+elif [ $# -eq 2 ]; then
+    domain="$1"
+    subdomain="$2"
+    runDig "$subdomain" "$domain"
+else
     echo "Usage: $0 domain [subdomain]"
     exit 1
-fi
-
-domain=$1
-sub=$2
-
-# If only domain is provided, check predefined subdomains
-if [ -z "$sub" ]; then
-    for subdomain in www lb-01 web-01 web-02; do
-        get_subdomain_info $domain $subdomain
-    done
-else
-    get_subdomain_info $domain $sub
 fi
