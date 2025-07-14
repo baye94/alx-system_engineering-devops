@@ -1,60 +1,33 @@
 #!/usr/bin/env bash
 
-# Function: get_subdomain_info
-# Description: Queries DNS for a given subdomain and domain, then formats the output.
-# Arguments:
-#   $1: The main domain name (e.g., holberton.online)
-#   $2: The specific subdomain name (e.g., www, lb-01)
-# Output:
-#   Prints a formatted string: "The subdomain [SUB_DOMAIN] is a [RECORD_TYPE] record and points to [DESTINATION]"
-get_subdomain_info() {
-    local domain="$1"
-    local subdomain="$2"
-    local full_hostname="${subdomain}.${domain}"
+# Function to get DNS record information for a specific subdomain and domain
+get_dns_record() {
+    local subdomain="$1"
+    local domain="$2"
+    local fqdn="${subdomain}.${domain}"
 
-    # Use 'dig' to query the DNS record for the full hostname.
-    # 'grep -A1 "ANSWER SECTION:"' filters the dig output to show only the answer section.
-    # 'awk' then processes the output:
-    # -v sub_name="$subdomain": Passes the shell variable 'subdomain' into awk as 'sub_name'.
-    # NR==2: Targets the second line of the grep output, which contains the actual DNS record.
-    # $4: Refers to the fourth field in the line (e.g., 'A' for A record).
-    # $5: Refers to the fifth field in the line (e.g., the IP address).
-    # SC2086 is ignored as per requirements, allowing unquoted variable expansion in dig command
-    dig "$full_hostname" | grep -A1 'ANSWER SECTION:' | awk -v sub_name="$subdomain" '
-        NR==2 {
-            print "The subdomain " sub_name " is a " $4 " record and points to " $5
-        }
-    '
+    # Query DNS and extract the first record from the answer section
+    local result
+    result=$(dig +noall +answer "$fqdn" 2>/dev/null | head -1)
+
+    # Extract record type and destination using awk
+    local record_type
+    record_type=$(echo "$result" | awk '{print $4}')
+    local destination
+    destination=$(echo "$result" | awk '{print $5}')
+
+    # Output the formatted result
+    echo "The subdomain $subdomain is a $record_type record and points to $destination"
 }
 
-# Main script execution logic based on provided arguments.
-# The script expects 1 or 2 arguments: <domain> [subdomain]
-
-if [ "$#" -eq 1 ]; then
-    # Case 1: Only the domain parameter is provided.
-    # Audit the default set of subdomains: www, lb-01, web-01, web-02.
-    domain_name="$1"
-
-    # Define an array of subdomains to audit in the specified order.
+# Main script logic
+if [ $# -eq 1 ]; then
+    # Domain only provided - check predefined subdomains
     subdomains=("www" "lb-01" "web-01" "web-02")
-
-    # Loop through the array and call the function for each subdomain.
     for sub in "${subdomains[@]}"; do
-        get_subdomain_info "$domain_name" "$sub"
+        get_dns_record "$sub" "$1"
     done
-elif [ "$#" -eq 2 ]; then
-    # Case 2: Both domain and specific subdomain parameters are provided.
-    # Audit only the specified subdomain.
-    domain_name="$1"
-    specific_subdomain="$2"
-
-    # Call the function for the specific subdomain.
-    get_subdomain_info "$domain_name" "$specific_subdomain"
-else
-    # Handle incorrect number of arguments.
-    # Although not strictly required to handle edge cases, providing usage is good practice.
-    echo "Usage: $0 <domain> [subdomain]"
-    echo "  <domain>: The domain name to audit (e.g., holberton.online)"
-    echo "  [subdomain]: (Optional) A specific subdomain to audit (e.g., web-02)"
-    exit 1
+elif [ $# -eq 2 ]; then
+    # Both domain and subdomain provided
+    get_dns_record "$2" "$1"
 fi
