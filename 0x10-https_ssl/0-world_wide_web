@@ -1,33 +1,26 @@
 #!/usr/bin/env bash
+# Ignore SC2086 as per instructions
 
-# Function to get DNS record information for a specific subdomain and domain
-get_dns_record() {
-    local subdomain="$1"
-    local domain="$2"
-    local fqdn="${subdomain}.${domain}"
-
-    # Query DNS and extract the first record from the answer section
-    local result
-    result=$(dig +noall +answer "$fqdn" 2>/dev/null | head -1)
-
-    # Extract record type and destination using awk
-    local record_type
-    record_type=$(echo "$result" | awk '{print $4}')
-    local destination
-    destination=$(echo "$result" | awk '{print $5}')
-
-    # Output the formatted result
-    echo "The subdomain $subdomain is a $record_type record and points to $destination"
+# Function to retrieve subdomain info
+get_subdomain_info() {
+    local domain=$1
+    local sub=$2
+    result=$(dig ${sub}.${domain} | grep -A1 "ANSWER SECTION:" | tail -n1)
+    record_type=$(echo $result | awk '{print $4}')
+    destination=$(echo $result | awk '{print $5}')
+    echo "The subdomain ${sub} is a ${record_type} record and points to ${destination}"
 }
 
-# Main script logic
-if [ $# -eq 1 ]; then
-    # Domain only provided - check predefined subdomains
-    subdomains=("www" "lb-01" "web-01" "web-02")
-    for sub in "${subdomains[@]}"; do
-        get_dns_record "$sub" "$1"
-    done
-elif [ $# -eq 2 ]; then
-    # Both domain and subdomain provided
-    get_dns_record "$2" "$1"
+# Main logic
+domain=$1
+subdomain=$2
+
+# Check if subdomain is provided
+if [ -z "$subdomain" ]; then
+    get_subdomain_info $domain www
+    get_subdomain_info $domain lb-01
+    get_subdomain_info $domain web-01
+    get_subdomain_info $domain web-02
+else
+    get_subdomain_info $domain $subdomain
 fi
