@@ -1,1 +1,57 @@
-ift-48f-8dq
+# 0x18. Webstack Monitoring
+
+## Description
+
+This project is part of the ALX System Engineering & DevOps track. It focuses on setting up infrastructure monitoring using [Datadog](https://www.datadoghq.com/), a cloud-based monitoring and analytics platform for IT operations and development teams.
+
+## Objectives
+
+- Learn how to install the Datadog agent on a server
+- Set up application and API keys
+- Connect a remote web server to the Datadog dashboard
+- Monitor server metrics and events in real time
+- Validate monitoring setup using Datadog's API
+
+## Steps Taken
+
+1. **Datadog Account Creation**
+   - Signed up for a free Datadog account at https://www.datadoghq.com
+   - Selected the **US1 region** for setup
+
+2. **Agent Installation**
+   - SSHed into the remote server `web-01`
+   - Installed the Datadog agent using the installation script:
+     ```bash
+     DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=<my_api_key> DD_SITE="datadoghq.com" bash -c "$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"
+     ```
+
+3. **Hostname Configuration**
+   - Updated the hostname of the server to match project naming convention:
+     ```bash
+     sudo hostnamectl set-hostname XX-web-01
+     sudo systemctl restart datadog-agent
+     ```
+
+4. **API and Application Keys**
+   - Created a Datadog Application Key from the [API settings page](https://app.datadoghq.com/account/settings#api)
+   - Submitted both the **API key** and **App key** on my Intranet profile
+
+5. **Verification**
+   - Confirmed that the server `XX-web-01` appears in Datadog’s infrastructure dashboard
+   - Also validated presence using Datadog API:
+     ```bash
+     curl -X GET "https://api.datadoghq.com/api/v1/hosts" \
+     -H "DD-API-KEY: <my_api_key>" \
+     -H "DD-APPLICATION-KEY: <my_app_key>"
+     ```
+
+## Useful Links
+
+- [Datadog Agent Installation Docs](https://docs.datadoghq.com/agent/)
+- [Datadog API Docs](https://docs.datadoghq.com/api/)
+- [Datadog Infrastructure Dashboard](https://app.datadoghq.com/infrastructure)
+
+## Author
+
+- **Your Full Name**
+- ALX SE - Cohort 2025
